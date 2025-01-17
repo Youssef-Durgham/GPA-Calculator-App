@@ -9,6 +9,7 @@ import {
   UserIcon,
 } from 'react-native-heroicons/outline';
 import HomeScreen from '../screens/HomeScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 const Tab = createBottomTabNavigator();
 const { width } = Dimensions.get('window');
@@ -197,7 +198,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
   );
 };
 
-export default function BottomTabs({ auth }) {
+export default function BottomTabs() {
   return (
     <Tab.Navigator
       tabBar={(props) => <CustomTabBar {...props} />}
@@ -227,7 +228,7 @@ export default function BottomTabs({ auth }) {
           ),
         }}
       >
-        {(props) => <HomeScreen {...props} auth={auth} />}
+        {(props) => <HomeScreen {...props} />}
       </Tab.Screen>
       <Tab.Screen
         name="Flights"
@@ -237,7 +238,7 @@ export default function BottomTabs({ auth }) {
           ),
         }}
       >
-        {(props) => <HomeScreen {...props} auth={auth} />}
+        {(props) => <HomeScreen {...props} />}
       </Tab.Screen>
       <Tab.Screen
         name="Bookings"
@@ -247,7 +248,7 @@ export default function BottomTabs({ auth }) {
           ),
         }}
       >
-        {(props) => <HomeScreen {...props} auth={auth} />}
+        {(props) => <HomeScreen {...props} />}
       </Tab.Screen>
       <Tab.Screen
         name="Favorites"
@@ -257,7 +258,7 @@ export default function BottomTabs({ auth }) {
           ),
         }}
       >
-        {(props) => <HomeScreen {...props} auth={auth} />}
+        {(props) => <HomeScreen {...props} />}
       </Tab.Screen>
       <Tab.Screen
         name="Profile"
@@ -267,7 +268,7 @@ export default function BottomTabs({ auth }) {
           ),
         }}
       >
-        {(props) => <HomeScreen {...props} auth={auth} />}
+        {(props) => <SettingsScreen {...props} />}
       </Tab.Screen>
     </Tab.Navigator>
   );

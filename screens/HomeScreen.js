@@ -1,15 +1,18 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { MMKV } from 'react-native-mmkv';
+const storage = new MMKV();  // Initialize MMKV storage
 
-export default function HomeScreen({ auth }) {
+export default function HomeScreen() {
   const navigation = useNavigation();
-  const { isSignedIn } = auth;
+  const signedInFlag = storage.getString('signedIn');
+
 
   const handlePayPress = () => {
     // If user is not signed in, go to SignIn
     // If they are signed in, go to Payment
-    if (!isSignedIn) {
+    if (!signedInFlag) {
       navigation.navigate('SignIn');
     } else {
       navigation.navigate('Payment');
