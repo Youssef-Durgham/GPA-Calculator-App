@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import i18n from './i18n';
-import RNRestart from 'react-native-restart'; // if still needed
+import RNRestart from 'react-native-restart';
 import './global.css';
 
 import BottomTabs from './navigation/BottomTabs';
@@ -21,14 +21,19 @@ import SignInScreen from './screens/SignInScreen';
 import PaymentScreen from './screens/PaymentScreen';
 import CustomHeader from './components/CustomHeader';
 import { AuthContext } from './components/AuthContext';
+import { LanguageDirectionProvider } from './LanguageDirectionContext';
+import SearchScreen from './screens/SearchScreen';
 
-// NEW IMPORTS
-import {
-  LanguageDirectionProvider
-} from './LanguageDirectionContext'; // <-- Your new file
+// Add these imports
+
+import CalendarScreen from './screens/CalendarScreen';
 
 const storage = new MMKV();
 const Stack = createNativeStackNavigator();
+
+
+// Create a separate navigator for the travel-related screens
+
 
 function App() {
   const [language, setLanguage] = useState('en');
@@ -40,8 +45,6 @@ function App() {
       await i18n.changeLanguage(persistedLang);
       setLanguage(persistedLang);
 
-      // If you still want to forcibly set system direction upon load:
-      // (Be aware: this can cause a need to restart the app)
       if (persistedLang === 'ar') {
         I18nManager.allowRTL(true);
         I18nManager.forceRTL(true);
@@ -84,7 +87,7 @@ function App() {
           setInitialRoute('SignIn');
         }
       } catch (e) {
-        console.error(e);
+        console.log(e);
         setInitialRoute('SignIn');
       } finally {
         setLoading(false);
@@ -94,13 +97,12 @@ function App() {
   }, []);
 
   if (loading || !initialRoute) {
-    return null; // or a loading spinner
+    return null;
   }
 
   return (
     <SafeAreaProvider>
       <AuthContext.Provider value={authContextValue}>
-        {/* Wrap everything in the direction provider */}
         <LanguageDirectionProvider>
           <NavigationContainer>
             <Stack.Navigator
@@ -141,7 +143,6 @@ function App() {
                     iconColor: '#34495e',
                     hideTitle: false,
                     leftIcon: 'chevron-back',
-                    // onLeftPress: () => navigation.goBack(), // Put this in SignInScreen if needed
                     rightIcon: 'information-circle-outline',
                     onRightPress: () => console.log('Info pressed'),
                     showBack: true,
@@ -166,6 +167,23 @@ function App() {
                   },
                 })}
               />
+
+              <Stack.Screen
+                name="Search"
+                component={SearchScreen}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
+  name="Calendar"
+  component={CalendarScreen}
+  options={{
+    headerShown: false,
+    presentation: 'modal',
+  }}
+/>
+              
             </Stack.Navigator>
           </NavigationContainer>
         </LanguageDirectionProvider>

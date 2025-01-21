@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, Platform, Animated, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, Platform, Animated, Dimensions, TouchableOpacity, SafeAreaView } from 'react-native';
 import {
   HomeIcon,
   PaperAirplaneIcon,
@@ -29,172 +29,139 @@ const AnimatedIndicator = ({ measureLayout, currentIndex }) => {
 
 };
 
-const TabBarIcon = ({ Icon, focused, label }) => {
-  const animatedValues = {
-    scale: useRef(new Animated.Value(1)).current,
-    translateY: useRef(new Animated.Value(0)).current,
-    opacity: useRef(new Animated.Value(0.8)).current,
-  };
+const TabBarIcon = ({ Icon, focused }) => {
+  const scale = useRef(new Animated.Value(1)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
+  const glowOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const { scale, translateY, opacity } = animatedValues;
-    
-    if (focused) {
-      Animated.parallel([
-        Animated.spring(scale, {
-          toValue: 1.15,
-          tension: 40,
-          friction: 5,
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateY, {
-          toValue: -10,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.spring(scale, {
-          toValue: 1,
-          tension: 40,
-          friction: 5,
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateY, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 0.8,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
+    Animated.parallel([
+      Animated.spring(scale, {
+        toValue: focused ? 1.2 : 1,
+        useNativeDriver: true,
+        tension: 30,
+        friction: 7,
+      }),
+     
+      Animated.timing(glowOpacity, {
+        toValue: focused ? 1 : 0,
+        duration: 200,
+        useNativeDriver: false,
+      }),
+    ]).start();
   }, [focused]);
 
-  const iconColor = focused ? '#2563eb' : '#64748b';
-  const containerStyle = focused ? {
-    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-    borderRadius: 16,
-    padding: 12,
-  } : {};
-
   return (
-    <Animated.View
-      style={{
-        alignItems: 'center',
-        transform: [
-          { scale: animatedValues.scale },
-          { translateY: animatedValues.translateY },
-        ],
-        opacity: animatedValues.opacity,
-      }}
-    >
-      <View style={containerStyle}>
-        <Icon
-          color={iconColor}
-          size={24}
-          style={{
-            transform: [{ rotate: Icon === PaperAirplaneIcon ? '45deg' : '0deg' }],
-          }}
-        />
-      </View>
-      <Text
+    <View style={{ alignItems: 'center', justifyContent: 'center', height: 60 }}>
+      {/* Glow Radial Effect */}
+      <Animated.View
         style={{
-          color: iconColor,
-          fontSize: 11,
-          fontWeight: focused ? '600' : '500',
-          marginTop: 6,
-          letterSpacing: focused ? 0.3 : 0,
+          position: 'absolute',
+          bottom: -30,
+          width: 80,
+          height: 30,
+          backgroundColor: '#29286D',
+          opacity: glowOpacity.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 0.2],
+          }),
+          transform: [
+            {
+              scaleX: glowOpacity.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.5, 1.3],
+              }),
+            },
+            {
+              scaleY: glowOpacity.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.5, 1],
+              }),
+            },
+          ],
+          shadowColor: '#0096FF',
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.5,
+
+        }}
+      />
+
+      {/* Icon */}
+      <Animated.View
+        style={{
+          transform: [{ scale }, { translateY }],
         }}
       >
-        {label}
-      </Text>
-    </Animated.View>
+        <Icon color={focused ? '#fff' : '#484873'} size={28} />
+      </Animated.View>
+    </View>
   );
 };
 
 const CustomTabBar = ({ state, descriptors, navigation }) => {
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        position: 'absolute',
-        bottom: Platform.OS === 'ios' ? 24 : 16,
-        left: 16,
-        right: 16,
-        height: 72,
-        backgroundColor: '#ffffff',
-        borderRadius: 28,
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 0,
-          height: 8,
-        },
-        shadowOpacity: 0.12,
-        shadowRadius: 16,
-        elevation: 8,
-        paddingHorizontal: 8,
-        borderWidth: Platform.OS === 'ios' ? 0.5 : 0,
-        borderColor: 'rgba(0, 0, 0, 0.1)',
-      }}
-    >
-      <AnimatedIndicator currentIndex={state.index} />
-      {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key];
-        const label = options.tabBarLabel ?? options.title ?? route.name;
-        const isFocused = state.index === index;
+    <SafeAreaView edges={['bottom']} style={{ backgroundColor: '#0B0B3B' }}>
+      <View
+ style={{
+      flexDirection: 'row',
+      height: 60,
+      backgroundColor: '#0B0B3B',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -5 }, // Negative height to apply shadow at the top
+      shadowOpacity: 0.3,
+      shadowRadius: 10,
+      elevation: 10, // Works on Android, but only applies below the View
+    }}
 
-        const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
+      >
+        <AnimatedIndicator currentIndex={state.index} />
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key];
+          const label = options.tabBarLabel ?? options.title ?? route.name;
+          const isFocused = state.index === index;
 
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name);
-          }
-        };
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
 
-        const onLongPress = () => {
-          navigation.emit({
-            type: 'tabLongPress',
-            target: route.key,
-          });
-        };
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
 
-        return (
-          <TouchableOpacity
-            key={route.key}
-            accessibilityRole="button"
-            accessibilityState={isFocused ? { selected: true } : {}}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
-            onPress={onPress}
-            onLongPress={onLongPress}
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: 4,
-            }}
-          >
-            {options.tabBarIcon?.({
-              focused: isFocused,
-              label,
-            })}
-          </TouchableOpacity>
-        );
-      })}
-    </View>
+          const onLongPress = () => {
+            navigation.emit({
+              type: 'tabLongPress',
+              target: route.key,
+            });
+          };
+
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              style={{
+                flex: 1,
+
+
+              }}
+            >
+              {options.tabBarIcon?.({
+                focused: isFocused,
+                label,
+              })}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </SafeAreaView>
   );
 };
 

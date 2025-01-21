@@ -23,6 +23,9 @@ target 'MobileApp' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  pod 'lottie-ios', '~> 4.4.1'
+  # run pod update lottie-ios to fix the error
+
   target 'MobileAppTests' do
     inherit! :complete
     # Pods for testing
