@@ -10,6 +10,7 @@ import {
 } from 'react-native-heroicons/outline';
 import HomeScreen from '../screens/HomeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import VisaRequestScreen from '../screens/VisaRequestScreen';
 
 const Tab = createBottomTabNavigator();
 const { width } = Dimensions.get('window');
@@ -207,7 +208,7 @@ export default function BottomTabs() {
       >
         {(props) => <HomeScreen {...props} />}
       </Tab.Screen>
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Bookings"
         options={{
           tabBarIcon: (props) => (
@@ -216,6 +217,16 @@ export default function BottomTabs() {
         }}
       >
         {(props) => <HomeScreen {...props} />}
+      </Tab.Screen> */}
+      <Tab.Screen
+        name="Visa"
+        options={{
+          tabBarIcon: (props) => (
+            <TabBarIcon {...props} Icon={CalendarDaysIcon} label="Visa" />
+          ),
+        }}
+      >
+        {(props) => <VisaRequestScreen {...props} />}
       </Tab.Screen>
       <Tab.Screen
         name="Favorites"
