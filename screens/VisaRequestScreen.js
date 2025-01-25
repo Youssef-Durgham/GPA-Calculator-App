@@ -25,9 +25,9 @@ const VisaRequestScreen = () => {
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.stars, { transform: [{ rotate: starInterpolation }] }]}> 
-        <Icon name="star" size={30} color="#fff" style={styles.starIcon} />
-        <Icon name="star" size={25} color="#fff" style={styles.starIcon} />
-        <Icon name="star" size={20} color="#fff" style={styles.starIcon} />
+        <Icon name="star" size={15} color="#fff" style={[styles.starIcon, { top: 50, left: 20 }]} />
+        <Icon name="star" size={10} color="#fff" style={[styles.starIcon, { top: 100, left: 150 }]} />
+        <Icon name="star" size={20} color="#fff" style={[styles.starIcon, { top: 200, left: 300 }]} />
       </Animated.View>
       <Text style={styles.text}>Visa Passport Request</Text>
     </View>
