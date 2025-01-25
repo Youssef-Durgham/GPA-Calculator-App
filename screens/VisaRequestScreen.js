@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,7 +24,11 @@ const VisaRequestScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.stars, { transform: [{ rotate: starInterpolation }] }]} />
+      <Animated.View style={[styles.stars, { transform: [{ rotate: starInterpolation }] }]}> 
+        <Icon name="star" size={30} color="#fff" style={styles.starIcon} />
+        <Icon name="star" size={25} color="#fff" style={styles.starIcon} />
+        <Icon name="star" size={20} color="#fff" style={styles.starIcon} />
+      </Animated.View>
       <Text style={styles.text}>Visa Passport Request</Text>
     </View>
   );
@@ -32,9 +37,14 @@ const VisaRequestScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#1C1C1E',
     justifyContent: 'center',
     alignItems: 'center',
+starIcon: {
+    position: 'absolute',
+    top: Math.random() * height,
+    left: Math.random() * width,
+  },
   },
   stars: {
     position: 'absolute',
