@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Animated, Dimensions, ImageBackground } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -22,7 +22,7 @@ const VisaRequestScreen = () => {
   });
 
   return (
-    <View style={styles.container}>
+    <ImageBackground style={styles.container} source={require('../assets/background.png')}>
       <Animated.View style={[styles.stars, { transform: [{ rotate: starInterpolation }] }]} />
       <Text style={styles.text}>Visa Passport Request</Text>
     </View>
@@ -32,7 +32,7 @@ const VisaRequestScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#1C1C1E',
     justifyContent: 'center',
     alignItems: 'center',
   },
