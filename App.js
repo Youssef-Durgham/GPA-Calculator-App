@@ -27,6 +27,9 @@ import SearchScreen from './screens/SearchScreen';
 // Add these imports
 
 import CalendarScreen from './screens/CalendarScreen';
+import CountrySearchScreen from './screens/CountrySearchScreen';
+import { VisaFormProvider } from './contexts/VisaFormContext';
+import FlightResultsScreen from './screens/FlightResultsScreen';
 
 const storage = new MMKV();
 const Stack = createNativeStackNavigator();
@@ -104,6 +107,7 @@ function App() {
     <SafeAreaProvider>
       <AuthContext.Provider value={authContextValue}>
         <LanguageDirectionProvider>
+        <VisaFormProvider>
           <NavigationContainer>
             <Stack.Navigator
               initialRouteName={initialRoute}
@@ -176,6 +180,18 @@ function App() {
                 }}
               />
               <Stack.Screen
+  name="FlightResults"
+  component={FlightResultsScreen}
+  options={{ headerShown: false }}
+/>
+                            <Stack.Screen
+                name="CountrySearch"
+                component={CountrySearchScreen}
+                options={{
+                  headerShown: false,
+                }}
+              />
+              <Stack.Screen
   name="Calendar"
   component={CalendarScreen}
   options={{
@@ -186,6 +202,7 @@ function App() {
               
             </Stack.Navigator>
           </NavigationContainer>
+          </VisaFormProvider>
         </LanguageDirectionProvider>
       </AuthContext.Provider>
     </SafeAreaProvider>

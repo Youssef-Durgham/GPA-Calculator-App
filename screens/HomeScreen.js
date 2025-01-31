@@ -8,7 +8,8 @@ import {
   useWindowDimensions, 
   Platform, 
   FlatList, 
-  ScrollView 
+  ScrollView ,
+  SafeAreaView
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MMKV } from 'react-native-mmkv';
@@ -169,7 +170,12 @@ export default function HomeScreen({ route }) {
   };
 
   useEffect(() => {
-    if (route.params?.selectedLocation && route.params?.type) {
+    // Only update HomeScreen’s from/to if there’s no tripIndex (i.e. not multi-trip)
+    if (
+      route.params?.selectedLocation &&
+      route.params?.type &&
+      route.params.tripIndex === undefined
+    ) {
       const { selectedLocation, type } = route.params;
       if (type === 'from') {
         setFromLocation(selectedLocation);
@@ -177,11 +183,12 @@ export default function HomeScreen({ route }) {
         setToLocation(selectedLocation);
       }
     }
-  }, [route.params]);
+  }, [route.params]);  
 
   return (
     <View style={{ flex: 1, backgroundColor: '#0B0B3B' }}>
-      <View style={{ height: RPH(100) - bottomTabBarHeight, paddingBottom: bottomTabBarHeight2 }}>
+       <SafeAreaView className='bg-[#1B1F6C]' style={{ flex: 1 }}>
+      <View className='bg-[#0B0B3B]' style={{ height: RPH(94) - bottomTabBarHeight, paddingBottom: bottomTabBarHeight2 }}>
         <LinearGradient
           colors={['#1B1F6C', '#3E3188', '#6E48A6', '#A764AD', '#D889A8']}
           style={{ height: '50%', width: '100%', position: 'absolute' }}
@@ -191,7 +198,6 @@ export default function HomeScreen({ route }) {
             justifyContent: 'space-between',
             alignItems: 'center',
             paddingHorizontal: 16,
-            paddingTop: 48,
             paddingBottom: 16,
           }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -226,7 +232,7 @@ export default function HomeScreen({ route }) {
               height: '100%',
               width: '100%',
               position: 'absolute',
-              top: '5%',
+              top: '0%',
               left: 0,
               transform: [{ scale: 1.45 }],
             }}
@@ -262,10 +268,7 @@ export default function HomeScreen({ route }) {
             handleReverseLocations={handleReverseLocations}
             onHeightChange={(height) => setFormHeight(height)}
           />
-          <View style={{
-            padding: 10,
-            marginTop: formHeight + 360,
-          }}>
+         <View style={{ padding: 10 }}>
             <View style={{
               marginBottom: 16,
               paddingHorizontal: 12
@@ -302,6 +305,7 @@ export default function HomeScreen({ route }) {
           </View>
         </ScrollView>
       </View>
+      </SafeAreaView>
     </View>
   );
 }
