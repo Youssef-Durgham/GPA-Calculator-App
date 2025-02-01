@@ -35,7 +35,7 @@ const DatePickerModal = ({ visible, onClose, date, onDateChange }) => {
   };
 
   return (
-<<<<<<< HEAD
+
     <Modal
       visible={visible}
       transparent
@@ -95,16 +95,7 @@ const DatePickerModal = ({ visible, onClose, date, onDateChange }) => {
         </View>
       </View>
     </Modal>
-=======
-    <View style={styles.container}>
-      <Animated.View style={[styles.stars, { transform: [{ rotate: starInterpolation }] }]}> 
-        <Icon name="star" size={15} color="#fff" style={[styles.starIcon, { top: 50, left: 20 }]} />
-        <Icon name="star" size={10} color="#fff" style={[styles.starIcon, { top: 100, left: 150 }]} />
-        <Icon name="star" size={20} color="#fff" style={[styles.starIcon, { top: 200, left: 300 }]} />
-      </Animated.View>
-      <Text style={styles.text}>Visa Passport Request</Text>
-    </View>
->>>>>>> bc1c5c1c95bee45d4e1644fb86a0f9388588e568
+
   );
 };
 
