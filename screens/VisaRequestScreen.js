@@ -5,7 +5,6 @@ import {
   SafeAreaView, 
   ScrollView,
   Dimensions,
-  Platform,
   useWindowDimensions 
 } from 'react-native';
 import { MMKV } from 'react-native-mmkv';
@@ -44,30 +43,8 @@ export default function HomeScreen({ route }) {
           console.log('Error parsing stored semesters:', e);
         }
       } else {
-        // If no data is stored, load sample data:
-        setSemesters([
-          {
-            semesterNumber: 1,
-            courses: [
-              { courseCode: "CS101", creditHours: 3, grade: "A" },
-              { courseCode: "MATH101", creditHours: 4, grade: "B+" }
-            ]
-          },
-          {
-            semesterNumber: 2,
-            courses: [
-              { courseCode: "CS102", creditHours: 3, grade: "A-" },
-              { courseCode: "MATH102", creditHours: 4, grade: "B" }
-            ]
-          },
-          {
-            semesterNumber: 3,
-            courses: [
-              { courseCode: "CS201", creditHours: 3, grade: "B+" },
-              { courseCode: "ENG201", creditHours: 3, grade: "A" }
-            ]
-          }
-        ]);
+        // If no data is stored, load sample data or leave empty
+        setSemesters([]);
       }
     }, [])
   );
@@ -141,21 +118,30 @@ export default function HomeScreen({ route }) {
     return semesters.reduce((acc, sem) => acc + calculateSemesterCredits(sem), 0);
   };
 
-  // Prepare data for the combined line chart.
+  // Prepare safe data arrays for charts.
   const semesterGPAs = semesters.map(s => calculateSemesterGPA(s));
   const cumulativeGPAs = calculateCumulativeGPAs();
+  const creditDataArray = semesters.map(s => calculateSemesterCredits(s));
+
+  // Provide fallback values if the arrays are empty.
+  const safeLabels = semesters.length > 0 ? semesters.map((s, i) => `Sem ${i + 1}`) : ['N/A'];
+  const safeSemesterGPAs = semesterGPAs.length > 0 ? semesterGPAs : [0];
+  const safeCumulativeGPAs = cumulativeGPAs.length > 0 ? cumulativeGPAs : [0];
+  const safeCreditDataArray = creditDataArray.length > 0 ? creditDataArray : [0];
+
+  // Prepare data for the combined line chart.
   const lineChartData = {
-    labels: semesters.map((s, i) => `Sem ${i + 1}`),
+    labels: safeLabels,
     datasets: [
       {
-        data: semesterGPAs,
+        data: safeSemesterGPAs,
         color: (opacity = 1) => `rgba(255, 111, 97, ${opacity})`,
         strokeWidth: 2,
         withDots: true,
         label: 'Semester GPA'
       },
       {
-        data: cumulativeGPAs,
+        data: safeCumulativeGPAs,
         color: (opacity = 1) => `rgba(97, 205, 187, ${opacity})`,
         strokeWidth: 2,
         withDots: true,
@@ -167,18 +153,20 @@ export default function HomeScreen({ route }) {
 
   // Prepare data for the bar chart.
   const creditData = {
-    labels: semesters.map((s, i) => `Sem ${i + 1}`),
+    labels: safeLabels,
     datasets: [
       {
-        data: semesters.map(s => calculateSemesterCredits(s))
+        data: safeCreditDataArray
       }
     ]
   };
 
   // Progress chart: overall credits earned vs target.
   const overallCredits = calculateOverallCredits();
+  // Clamp the fraction so that it never exceeds 1
+  const progressFraction = Math.min(overallCredits / targetCredits, 1);
   const progressData = {
-    data: [overallCredits / targetCredits]
+    data: [progressFraction]
   };
 
   const overallGPA = calculateOverallGPA();
@@ -231,6 +219,9 @@ export default function HomeScreen({ route }) {
           chartConfig={chartConfig}
           bezier
           style={{ marginVertical: RPH(2), borderRadius: 16 }}
+          onDataPointClick={(data) => {
+            alert(`Data Point: ${data.value}`);
+          }}
         />
 
         {/* Bar Chart for Total Credit Hours per Semester */}
@@ -243,6 +234,9 @@ export default function HomeScreen({ route }) {
           height={220}
           chartConfig={chartConfig}
           style={{ marginVertical: RPH(2), borderRadius: 16 }}
+          onDataPointClick={(data) => {
+            alert(`Data Point: ${data.value}`);
+          }}
         />
 
         {/* Progress Chart for Credit Completion */}

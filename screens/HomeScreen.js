@@ -14,6 +14,7 @@ import {
   Alert,
   Share
 } from 'react-native';
+import { ChevronDownIcon, ChevronUpIcon } from 'react-native-heroicons/outline';
 import { MMKV } from 'react-native-mmkv';
 import Collapsible from 'react-native-collapsible';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -32,6 +33,8 @@ export default function HomeScreen() {
   const RPH = (percentage) => (percentage / 100) * height;
   const RPW = (percentage) => (percentage / 100) * width;
   const navigation = useNavigation();
+  const isSmallScreen = width < 360; // adjust threshold as needed
+
 
   // Get user name from storage.
   const userName = storage.getString('userName') || 'Guest';
@@ -169,7 +172,11 @@ export default function HomeScreen() {
           <Text style={{ color: '#fff', fontSize: RPW(4) }}>
             {selectedValue ? selectedValue : placeholder}
           </Text>
-          <Text style={{ color: '#fff', fontSize: RPW(4) }}>{open ? '-' : '+'}</Text>
+          {open ? (
+            <ChevronUpIcon color="#fff" size={RPW(4)} />
+          ) : (
+            <ChevronDownIcon color="#fff" size={RPW(4)} />
+          )}
         </TouchableOpacity>
         {open && (
           <View
@@ -205,7 +212,7 @@ export default function HomeScreen() {
         )}
       </View>
     );
-  };
+  };  
 
   /** HELPER FUNCTIONS **/
 
@@ -300,13 +307,19 @@ export default function HomeScreen() {
 
   // Submit the add/edit course modal.
   const submitCourseModal = () => {
-    if (!courseCode) return;
+    // Check if the course code (name) is empty or only whitespace
+    if (!courseCode.trim()) {
+      Alert.alert('Missing Course Code', 'Please enter a course code before submitting.');
+      return;
+    }
+    
     const newCourse = {
       id: Date.now(),
-      courseCode,
+      courseCode: courseCode.trim(),
       creditHours: parseInt(selectedCreditHours, 10),
       grade: selectedGrade
     };
+  
     const updatedSemesters = [...semesters];
     if (isEditingCourse && currentCourseIndex !== null) {
       updatedSemesters[currentSemesterIndex].courses[currentCourseIndex] = newCourse;
@@ -317,7 +330,7 @@ export default function HomeScreen() {
     setIsCourseModalVisible(false);
     setIsEditingCourse(false);
     setCurrentCourseIndex(null);
-  };
+  };  
 
   // Open the delete semester modal.
   const openDeleteSemesterModal = (semesterIndex) => {
@@ -364,25 +377,54 @@ export default function HomeScreen() {
   };
 
   const submitGoalPredictor = () => {
+    // Check if there are no semesters or if every semester has no courses
+    if (
+      semesters.length === 0 ||
+      semesters.every((sem) => !sem.courses || sem.courses.length === 0)
+    ) {
+      Alert.alert(
+        'No Data Available',
+        'Please create at least one semester and add courses before using the CGPA Goal Predictor.'
+      );
+      return;
+    }
+    
     const data = computeGoalData();
     setGoalData(data);
-  };
+  };  
 
-  // --- Export GPA Data as an Image ---
-  const exportGPAData = async () => {
-    try {
-      const uri = await captureRef(summaryRef, {
-        format: 'png',
-        quality: 0.8
-      });
-      await Share.share({
-        url: uri,
-        message: 'Check out my GPA summary!'
-      });
-    } catch (error) {
-      Alert.alert('Error', 'Failed to export GPA data as image.');
+// --- Export GPA Data as an Image ---
+const exportGPAData = async () => {
+  try {
+    if (!summaryRef.current) {
+      Alert.alert('Error', 'Summary view is not available for export.');
+      return;
     }
-  };
+
+    // Ensure the layout is complete before capturing
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    // Pass the actual view node using summaryRef.current
+    const uri = await captureRef(summaryRef.current, {
+      format: 'png',
+      quality: 0.8,
+      result: 'tmpfile', // Ensures file is properly saved
+    });
+
+    if (!uri) {
+      Alert.alert('Error', 'Failed to capture the GPA summary.');
+      return;
+    }
+
+    await Share.share({
+      url: uri,
+      message: 'Check out my GPA summary!',
+    });
+  } catch (error) {
+    Alert.alert('Error', 'Failed to export GPA data as image.');
+    console.error(error);
+  }
+};
 
   // --- Grade Conversion Reference Text ---
   const gradeConversionText = `
@@ -414,39 +456,100 @@ F  : 0.0
             (American University in Iraq)
           </Text>
           {/* Extra features buttons */}
-          <View style={{ flexDirection: 'row', marginTop: RPH(2) }}>
-            <TouchableOpacity
-              onPress={openGoalPredictorModal}
-              style={{ backgroundColor: '#FF6F61', padding: RPW(2), borderRadius: RPW(2), marginHorizontal: RPW(1) }}
-            >
-              <Text style={{ color: '#fff', fontSize: RPW(3.5) }}>CGPA Goal Predictor</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setIsGradeConversionModalVisible(true)}
-              style={{ backgroundColor: '#FF6F61', padding: RPW(2), borderRadius: RPW(2), marginHorizontal: RPW(1) }}
-            >
-              <Text style={{ color: '#fff', fontSize: RPW(3.5) }}>Grade Conversion</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={exportGPAData}
-              style={{ backgroundColor: '#FF6F61', padding: RPW(2), borderRadius: RPW(2), marginHorizontal: RPW(1) }}
-            >
-              <Text style={{ color: '#fff', fontSize: RPW(3.5) }}>Export GPA Data</Text>
-            </TouchableOpacity>
-          </View>
+          <View style={{ flexDirection: 'row', marginTop: RPH(2), justifyContent: 'center', flexWrap: 'wrap' }}>
+  <TouchableOpacity
+    onPress={openGoalPredictorModal}
+    style={{
+      backgroundColor: '#FF6F61',
+      paddingVertical: RPH(1.5),
+      paddingHorizontal: RPW(4),
+      borderRadius: RPW(2),
+      marginHorizontal: RPW(1.5),
+      width: RPW(30),
+      alignItems: 'center'
+    }}
+  >
+    <Text style={{ color: '#fff', fontSize: RPW(3.5), textAlign: 'center' }}>CGPA Goal Predictor</Text>
+  </TouchableOpacity>
+  
+  <TouchableOpacity
+    onPress={() => setIsGradeConversionModalVisible(true)}
+    style={{
+      backgroundColor: '#FF6F61',
+      paddingVertical: RPH(1.5),
+      paddingHorizontal: RPW(4),
+      borderRadius: RPW(2),
+      marginHorizontal: RPW(1.5),
+      width: RPW(30),
+      alignItems: 'center'
+    }}
+  >
+    <Text style={{ color: '#fff', fontSize: RPW(3.5), textAlign: 'center' }}>Grade Conversion</Text>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    onPress={exportGPAData}
+    style={{
+      backgroundColor: '#FF6F61',
+      paddingVertical: RPH(1.5),
+      paddingHorizontal: RPW(4),
+      borderRadius: RPW(2),
+      marginHorizontal: RPW(1.5),
+      width: RPW(30),
+      alignItems: 'center',
+      marginTop: RPH(1.5)
+    }}
+  >
+    <Text style={{ color: '#fff', fontSize: RPW(3.5), textAlign: 'center' }}>Export GPA Data</Text>
+  </TouchableOpacity>
+</View>
+
         </View>
 
-        {/* GPA Summary View (to be exported as image) */}
-        <View ref={summaryRef} style={{ marginBottom: RPH(3), alignItems: 'center', borderWidth: 1, borderColor: '#FF6F61', padding: RPW(2), borderRadius: RPW(2) }}>
-          <Text style={{ fontSize: RPW(5), color: '#fff', fontWeight: '600' }}>
-            Cumulative GPA: {calculateCumulativeGPA()}
-          </Text>
-          <Text style={{ fontSize: RPW(4), color: '#fff', marginTop: RPH(1) }}>
-            Total Credits: {
-              semesters.reduce((acc, sem) => acc + (sem.courses ? sem.courses.reduce((sum, course) => sum + course.creditHours, 0) : 0), 0)
-            } / {targetCredits}
-          </Text>
-        </View>
+{/* GPA Summary View (to be exported as image) */}
+<View
+  ref={summaryRef}
+  collapsable={false} // Prevents React Native from optimizing this view away
+  style={{
+    backgroundColor: '#0B0B3B', // Explicit background so that text shows in the capture
+    marginBottom: RPH(3),
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FF6F61',
+    padding: RPW(2),
+    borderRadius: RPW(2)
+  }}
+>
+<Text
+  style={{
+    fontSize: RPW(5) * (isSmallScreen ? 0.8 : 1),
+    color: '#fff',
+    fontWeight: '600',
+    textAlign: 'center'
+  }}
+>
+  Cumulative GPA: {calculateCumulativeGPA()}
+</Text>
+<Text
+  style={{
+    fontSize: RPW(3) * (isSmallScreen ? 0.8 : 1),
+    color: '#fff',
+    marginTop: RPH(1),
+    flexWrap: 'wrap',
+    textAlign: 'center'
+  }}
+>
+  {`Total Credits: ${
+    semesters.reduce(
+      (acc, sem) =>
+        acc + (sem.courses ? sem.courses.reduce((sum, course) => sum + course.creditHours, 0) : 0),
+      0
+    )
+  } / ${targetCredits}`}
+</Text>
+
+</View>
+
 
         {/* Button to Create New Semester */}
         <TouchableOpacity
@@ -464,27 +567,68 @@ F  : 0.0
 
         {/* List of Semesters */}
         {semesters.map((semester, semIndex) => (
-          <View
-            key={semester.id}
-            style={{
-              backgroundColor: '#1A1A6B',
-              borderRadius: RPW(2),
-              padding: RPW(3),
-              marginBottom: RPH(2)
-            }}
-          >
-            {/* Semester Header with name, GPA and delete semester button */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <TouchableOpacity onPress={() => toggleSemester(semIndex)} style={{ flex: 1 }}>
-                <Text style={{ color: '#fff', fontSize: RPW(5), fontWeight: '600' }}>
-                  {semester.name}
-                </Text>
-                <Text style={{ color: '#fff', fontSize: RPW(4) }}>
-                  GPA: {calculateSemesterGPA(semester)}
-                </Text>
-              </TouchableOpacity>
+  <View
+    key={semester.id}
+    style={{
+      backgroundColor: '#1A1A6B',
+      borderRadius: RPW(2),
+      padding: RPW(3),
+      marginBottom: RPH(2)
+    }}
+  >
+    {/* Semester Header with name, GPA, dropdown indicator, and delete button */}
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <TouchableOpacity 
+        onPress={() => toggleSemester(semIndex)} 
+        style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
+      >
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: '#fff', fontSize: RPW(5), fontWeight: '600' }}>
+            {semester.name}
+          </Text>
+          <Text style={{ color: '#fff', fontSize: RPW(4) }}>
+            GPA: {calculateSemesterGPA(semester)}
+          </Text>
+        </View>
+        {/* Dropdown indicator icon */}
+        {semester.isExpanded ? (
+          <ChevronUpIcon color="#fff" size={RPW(4)} />
+        ) : (
+          <ChevronDownIcon color="#fff" size={RPW(4)} />
+        )}
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => openDeleteSemesterModal(semIndex)}
+        style={{
+          backgroundColor: '#FF6F61',
+          padding: RPW(1.5),
+          borderRadius: RPW(1),
+          marginLeft: RPW(2)
+        }}
+      >
+        <Text style={{ color: '#fff', fontSize: RPW(3.5) }}>Delete</Text>
+      </TouchableOpacity>
+    </View>
+
+    {/* Collapsible Content: Courses */}
+    <Collapsible collapsed={!semester.isExpanded} duration={300}>
+      <View style={{ marginTop: RPH(1) }}>
+        {semester.courses && semester.courses.length > 0 ? (
+          semester.courses.map((course, courseIndex) => (
+            <View
+              key={course.id}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: RPH(1)
+              }}
+            >
+              <Text style={{ color: '#fff', fontSize: RPW(4), flex: 1 }}>
+                {course.courseCode} | {course.creditHours} Credit(s) | {course.grade}
+              </Text>
               <TouchableOpacity
-                onPress={() => openDeleteSemesterModal(semIndex)}
+                onPress={() => openEditCourseModal(semIndex, courseIndex)}
                 style={{
                   backgroundColor: '#FF6F61',
                   padding: RPW(1.5),
@@ -492,70 +636,41 @@ F  : 0.0
                   marginLeft: RPW(2)
                 }}
               >
-                <Text style={{ color: '#fff', fontSize: RPW(3.5) }}>Delete</Text>
+                <Text style={{ color: '#fff', fontSize: RPW(3.5) }}>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => deleteCourse(semIndex, courseIndex)}
+                style={{
+                  backgroundColor: '#FF6F61',
+                  padding: RPW(1.5),
+                  borderRadius: RPW(1),
+                  marginLeft: RPW(1)
+                }}
+              >
+                <Text style={{ color: '#fff', fontSize: RPW(3.5) }}>🗑️</Text>
               </TouchableOpacity>
             </View>
+          ))
+        ) : (
+          <Text style={{ color: '#ccc', fontSize: RPW(4) }}>No courses added.</Text>
+        )}
+        <TouchableOpacity
+          onPress={() => openAddCourseModal(semIndex)}
+          style={{
+            backgroundColor: '#FF6F61',
+            padding: RPW(2),
+            borderRadius: RPW(2),
+            alignItems: 'center',
+            marginTop: RPH(1)
+          }}
+        >
+          <Text style={{ color: '#fff', fontSize: RPW(4) }}>Add Course</Text>
+        </TouchableOpacity>
+      </View>
+    </Collapsible>
+  </View>
+))}
 
-            {/* Collapsible Content: Courses */}
-            <Collapsible collapsed={!semester.isExpanded} duration={300}>
-              <View style={{ marginTop: RPH(1) }}>
-                {semester.courses && semester.courses.length > 0 ? (
-                  semester.courses.map((course, courseIndex) => (
-                    <View
-                      key={course.id}
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: RPH(1)
-                      }}
-                    >
-                      <Text style={{ color: '#fff', fontSize: RPW(4), flex: 1 }}>
-                        {course.courseCode} | {course.creditHours} Credit(s) | {course.grade}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => openEditCourseModal(semIndex, courseIndex)}
-                        style={{
-                          backgroundColor: '#FF6F61',
-                          padding: RPW(1.5),
-                          borderRadius: RPW(1),
-                          marginLeft: RPW(2)
-                        }}
-                      >
-                        <Text style={{ color: '#fff', fontSize: RPW(3.5) }}>Edit</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => deleteCourse(semIndex, courseIndex)}
-                        style={{
-                          backgroundColor: '#FF6F61',
-                          padding: RPW(1.5),
-                          borderRadius: RPW(1),
-                          marginLeft: RPW(1)
-                        }}
-                      >
-                        <Text style={{ color: '#fff', fontSize: RPW(3.5) }}>🗑️</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ))
-                ) : (
-                  <Text style={{ color: '#ccc', fontSize: RPW(4) }}>No courses added.</Text>
-                )}
-                <TouchableOpacity
-                  onPress={() => openAddCourseModal(semIndex)}
-                  style={{
-                    backgroundColor: '#FF6F61',
-                    padding: RPW(2),
-                    borderRadius: RPW(2),
-                    alignItems: 'center',
-                    marginTop: RPH(1)
-                  }}
-                >
-                  <Text style={{ color: '#fff', fontSize: RPW(4) }}>Add Course</Text>
-                </TouchableOpacity>
-              </View>
-            </Collapsible>
-          </View>
-        ))}
       </ScrollView>
 
       {/* Modal for Creating a New Semester */}

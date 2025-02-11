@@ -9,7 +9,6 @@ import {
   UserIcon,
 } from 'react-native-heroicons/outline';
 import HomeScreen from '../screens/HomeScreen';
-import SettingsScreen from '../screens/SettingsScreen';
 import VisaRequestScreen from '../screens/VisaRequestScreen';
 
 const Tab = createBottomTabNavigator();
@@ -198,7 +197,7 @@ export default function BottomTabs() {
       >
         {(props) => <HomeScreen {...props} />}
       </Tab.Screen>
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Flights"
         options={{
           tabBarIcon: (props) => (
@@ -207,7 +206,7 @@ export default function BottomTabs() {
         }}
       >
         {(props) => <HomeScreen {...props} />}
-      </Tab.Screen>
+      </Tab.Screen> */}
       {/* <Tab.Screen
         name="Bookings"
         options={{
@@ -228,7 +227,7 @@ export default function BottomTabs() {
       >
         {(props) => <VisaRequestScreen {...props} />}
       </Tab.Screen>
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Favorites"
         options={{
           tabBarIcon: (props) => (
@@ -237,8 +236,8 @@ export default function BottomTabs() {
         }}
       >
         {(props) => <HomeScreen {...props} />}
-      </Tab.Screen>
-      <Tab.Screen
+      </Tab.Screen> */}
+      {/* <Tab.Screen
         name="Profile"
         options={{
           tabBarIcon: (props) => (
@@ -247,7 +246,7 @@ export default function BottomTabs() {
         }}
       >
         {(props) => <SettingsScreen {...props} />}
-      </Tab.Screen>
+      </Tab.Screen> */}
     </Tab.Navigator>
   );
 }
