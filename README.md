@@ -13,8 +13,9 @@ A modern CGPA & GPA calculator for students, built with React Native for both iO
 
 📱 Platforms
 
-✅ Android
-✅ iOS (Export feature available only on iOS)
+Platform	Status
+✅ Android	Fully Supported
+✅ iOS	Export feature available only on iOS
 🛠️ Tech Stack
 
 React Native
@@ -24,32 +25,27 @@ react-native-chart-kit (for GPA trend visualization)
 react-native-view-shot (for image export)
 📥 Installation & Setup
 
-Clone the repository:
+# Clone the repository
 git clone https://github.com/Youssef-Durgham/CGPA-Calculator.git
 cd CGPA-Calculator
-Install dependencies:
+
+# Install dependencies
 npm install  
-Run on Android:
+
+# Run on Android
 npx react-native run-android  
-Run on iOS:
+
+# Run on iOS
 npx pod-install && npx react-native run-ios  
 📸 Screenshots
 
-Home Screen
-<img src="https://github.com/user-attachments/assets/fbdaeabb-2bf3-4f5f-8772-180c9dacdb5f" width="300">
-Course Management
-<img src="https://github.com/user-attachments/assets/abec6481-5eae-4150-9109-b40e2324c788" width="300">
-Goal Predictor
-<img src="https://github.com/user-attachments/assets/da9c6bcc-481d-400f-b2ff-6888bfb858db" width="300">
-GPA Trends
-<img src="https://github.com/user-attachments/assets/016f7647-7caa-49ae-8b0a-59c2958ac3d9" width="300">
-GPA Trends
-<img src="https://github.com/user-attachments/assets/256cf668-9100-4b44-b5b4-61b7043df84b" width="300">
+<p align="center"> <img src="https://github.com/user-attachments/assets/fbdaeabb-2bf3-4f5f-8772-180c9dacdb5f" width="30%" alt="Home Screen"> <img src="https://github.com/user-attachments/assets/abec6481-5eae-4150-9109-b40e2324c788" width="30%" alt="GPA Trends"> <img src="https://github.com/user-attachments/assets/da9c6bcc-481d-400f-b2ff-6888bfb858db" width="30%" alt="Goal Predictor"> </p> <p align="center"> <img src="https://github.com/user-attachments/assets/016f7647-7caa-49ae-8b0a-59c2958ac3d9" width="30%" alt="GPA Export Feature"> <img src="https://github.com/user-attachments/assets/256cf668-9100-4b44-b5b4-61b7043df84b" width="30%" alt="Course Management"> </p>
 📌 Future Improvements
 
-Cloud Sync – Backup GPA data online
-Dark Mode – UI theme customization
-Multi-language Support – Localization for different languages
+🔹 Cloud Sync – Backup GPA data online
+🔹 Dark Mode – UI theme customization
+🔹 Multi-language Support – Localization for different languages
+
 🤝 Contributing
 
 Contributions are welcome! Feel free to open an issue or pull request.
@@ -57,3 +53,4 @@ Contributions are welcome! Feel free to open an issue or pull request.
 📜 License
 
 This project is open-source and available under the MIT License.
+
