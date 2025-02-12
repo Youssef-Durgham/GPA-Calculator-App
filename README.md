@@ -27,6 +27,7 @@ react-native-view-shot (for image export)
 
 # Clone the repository
 git clone https://github.com/Youssef-Durgham/GPA-Calculator-App.git
+
 cd CGPA-Calculator
 
 # Install dependencies
